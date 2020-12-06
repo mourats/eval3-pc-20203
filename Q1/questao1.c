@@ -21,69 +21,69 @@ volatile int viagem_atual; // atual numero de viagens
 volatile int qtd_passageiro; // quantidade atual de threads passageiro
 volatile int capacidade; // capacidade atual da thread carro
 
-void carregar(){
-	printf("A viagem #%d vai começar, hora de carregar!\n", viagem_atual+1);
+void carregar() {
+	printf("A viagem #%d vai começar, hora de carregar!\n", viagem_atual + 1);
 	printf("A capacidade do carro é %d\n", capacidade);
-  for(int i = 0; i < capacidade; i++) {
-    sem_post(&embarque_fila); // Sinal para as threads passageiro paara embarcar no carro
-  }
-  sem_wait(&todos_embarcou); // Esperando todos os passageiros embarcar
+	for (int i = 0; i < capacidade; i++) {
+		sem_post(&embarque_fila); // Sinal para as threads passageiro paara embarcar no carro
+	}
+	sem_wait(&todos_embarcou); // Esperando todos os passageiros embarcar
 	sleep(1);
 }
 
-void correr(){
+void correr() {
 	printf("O carro está cheio, hora de viajar!\n");
 	sleep(1);
 	printf("O carro está realizando a viagem!\n");
 	sleep(2);
 }
 
-void descarregar(){
+void descarregar() {
 	printf("Fim da viagem, hora de descarregar!\n");
 
-  for(int i = 0; i < capacidade; i++) {
-    sem_post(&desembarque_fila); // Avisando os passageiros para desembarcar
-  }
-  sem_wait(&todos_desembarcou); // Avisando para começar a embarcar novamente
-  printf("O carro está vazio!\n\n");
+	for (int i = 0; i < capacidade; i++) {
+		sem_post(&desembarque_fila); // Avisando os passageiros para desembarcar
+	}
+	sem_wait(&todos_desembarcou); // Avisando para começar a embarcar novamente
+	printf("O carro está vazio!\n\n");
 	sleep(1);
 }
 
-void embarcar(){
+void embarcar() {
 
-  sem_wait(&embarque_fila); // Esperando um sinal do carro para embarcar
-  
-  pthread_mutex_lock(&lock_embarque);
-  embarcou++;
+	sem_wait(&embarque_fila); // Esperando um sinal do carro para embarcar
+
+	pthread_mutex_lock(&lock_embarque);
+	embarcou++;
 
 	printf("%d passageiro(s) embarcaram no carro...\n", embarcou);
 	sleep(1);
 
-  if (embarcou == capacidade){
-    sem_post(&todos_embarcou); // Caso seja o ultimo passageiro a embarcar, avisando o carro para correr
-    embarcou = 0;
-  }
-  pthread_mutex_unlock(&lock_embarque); 
+	if (embarcou == capacidade) {
+		sem_post(&todos_embarcou); // Caso seja o ultimo passageiro a embarcar, avisando o carro para correr
+		embarcou = 0;
+	}
+	pthread_mutex_unlock(&lock_embarque);
 }
 
-void desembarcar(){
-  sem_wait(&desembarque_fila); // Esperando a viagem terminar
+void desembarcar() {
+	sem_wait(&desembarque_fila); // Esperando a viagem terminar
 
-  pthread_mutex_lock(&lock_desembarque);
-  desembarcou++;
+	pthread_mutex_lock(&lock_desembarque);
+	desembarcou++;
 
 	printf("%d passageiro(s) desembarcaram do carro...\n", desembarcou);
 	sleep(1);
 
-  if (desembarcou == capacidade){
-    sem_post(&todos_desembarcou); // Caso seja o ultimo passageiro a desembarcar, avisando ao carro para carregar.
-    desembarcou = 0;
-  }
-  pthread_mutex_unlock(&lock_desembarque);
+	if (desembarcou == capacidade) {
+		sem_post(&todos_desembarcou); // Caso seja o ultimo passageiro a desembarcar, avisando ao carro para carregar.
+		desembarcou = 0;
+	}
+	pthread_mutex_unlock(&lock_desembarque);
 }
 
-void* carrro_thread(){
-	while(viagem_atual < (qtd_passageiro/capacidade)){
+void* carrro_thread() {
+	while (viagem_atual < (qtd_passageiro / capacidade)) {
 		carregar();
 		correr();
 		descarregar();
@@ -91,8 +91,8 @@ void* carrro_thread(){
 	}
 }
 
-void* passageiro_thread(){
-	while(1){
+void* passageiro_thread() {
+	while (1) {
 		embarcar();
 		desembarcar();
 	}
@@ -106,11 +106,11 @@ void initialize() {
 	sem_init(&todos_embarcou, 0, 0);
 	sem_init(&desembarque_fila, 0, 0);
 	sem_init(&todos_desembarcou, 0, 0);
-  embarcou = 0;
-  desembarcou = 0;
-  viagem_atual = 0;
-  qtd_passageiro = MAX_THREADS;
-  capacidade = CAPACITY_CAR;
+	embarcou = 0;
+	desembarcou = 0;
+	viagem_atual = 0;
+	qtd_passageiro = MAX_THREADS;
+	capacidade = CAPACITY_CAR;
 }
 
 void finish() {
@@ -124,25 +124,25 @@ void finish() {
 }
 
 int main() {
-  initialize();
+	initialize();
 
 	// Criando threads passageiro e thread carro
 	pthread_t passageiros[qtd_passageiro];
 	pthread_t carro;
 
-	printf("O carro irá realizar %d viagens hoje!\n", (qtd_passageiro/capacidade));
+	printf("O carro irá realizar %d viagens hoje!\n", (qtd_passageiro / capacidade));
 	printf("Capacidade do carro é %d\n", capacidade);
 	printf("Temos %d passageiros esperando para pegar um carona!\n\n", qtd_passageiro);
-	
+
 	pthread_create(&carro, NULL, carrro_thread, NULL);
-	for(int i = 0; i < qtd_passageiro; i++) {
-    pthread_create(&passageiros[i], NULL, passageiro_thread, NULL);
-  }
+	for (int i = 0; i < qtd_passageiro; i++) {
+		pthread_create(&passageiros[i], NULL, passageiro_thread, NULL);
+	}
 	// Join a thread carro 
 	pthread_join(carro, NULL);
 
 	printf("Todas as viagens foram realizando, desligando o carro e indo embora.\n");
 
-  finish();
+	finish();
 	return 0;
 }
