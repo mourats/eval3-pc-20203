@@ -23,15 +23,13 @@ volatile int capacidade; // capacidade atual da thread carro
 
 void carregar() {
 	printf("A viagem #%d vai começar, hora de carregar!\n", viagem_atual + 1);
-	printf("A capacidade do carro é %d\n", capacidade);
 	for (int i = 0; i < capacidade; i++) {
 		sem_post(&embarque_fila); // Sinal para as threads passageiro paara embarcar no carro
 	}
-	sem_wait(&todos_embarcou); // Esperando todos os passageiros embarcar
-	sleep(1);
 }
 
 void correr() {
+	sem_wait(&todos_embarcou); // Esperando todos os passageiros embarcar
 	printf("O carro está cheio, hora de viajar!\n");
 	sleep(1);
 	printf("O carro está realizando a viagem!\n");
@@ -131,7 +129,7 @@ int main() {
 	pthread_t carro;
 
 	printf("O carro irá realizar %d viagens hoje!\n", (qtd_passageiro / capacidade));
-	printf("Capacidade do carro é %d\n", capacidade);
+	printf("A capacidade do carro é %d\n", capacidade);
 	printf("Temos %d passageiros esperando para pegar um carona!\n\n", qtd_passageiro);
 
 	pthread_create(&carro, NULL, carrro_thread, NULL);
@@ -141,7 +139,7 @@ int main() {
 	// Join a thread carro 
 	pthread_join(carro, NULL);
 
-	printf("Todas as viagens foram realizando, desligando o carro e indo embora.\n");
+	printf("Todas as viagens foram realizadas, desligando o carro e indo embora.\n");
 
 	finish();
 	return 0;
