@@ -12,7 +12,6 @@
 /* Variaveis Globais */
 pthread_mutex_t mutex;
 pthread_cond_t full;
-pthread_cond_t available;
 volatile int beberam;
 volatile int bebendo;
 volatile int saiu;
@@ -58,7 +57,6 @@ void* aluno_thread() {
 void initialize() {
   // Inicializando mutexes e cond
   pthread_mutex_init(&mutex, NULL);
-  pthread_cond_init(&available, NULL);
   pthread_cond_init(&full, NULL);
   qtd_alunos = MAX_THREADS;
   bebendo = 0;
@@ -67,7 +65,6 @@ void initialize() {
 void finish() {
   // Destroindo mutexes e cond
   pthread_mutex_destroy(&mutex);
-  pthread_cond_destroy(&available);
   pthread_cond_destroy(&full);
 }
 
